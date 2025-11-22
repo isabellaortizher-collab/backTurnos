@@ -14,7 +14,16 @@ from fastapi.responses import JSONResponse
 
 app = FastAPI(title="Sistema de Turnos", version="0.2.0", debug=True)
 
-# Rate limiting
+# ✅✅✅ CORS DEBE IR PRIMERO - INMEDIATAMENTE DESPUÉS DE CREAR LA APP ✅✅✅
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Permite todo
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ✅ LUEGO el rate limiting
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
@@ -22,20 +31,6 @@ app.add_middleware(SlowAPIMiddleware)
 @app.exception_handler(RateLimitExceeded)
 def rate_limit_handler(request: Request, exc: RateLimitExceeded):
     return JSONResponse(status_code=429, content={"detail": "Límite de solicitudes excedido!"})
-
-cors_origins = settings.CORS_ORIGINS
-if isinstance(cors_origins, str):
-    cors_origins = [o.strip() for o in cors_origins.split(",") if o.strip()]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "*"  
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 register_exception_handlers(app)
 
@@ -46,10 +41,10 @@ def root():
 # ---- Routers ----
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(turnos.router)       
-app.include_router(servicios.router)         # /servicios ...
-app.include_router(users.router)             # según defina su router
+app.include_router(servicios.router)         
+app.include_router(users.router)             
 app.include_router(health.router)
-app.include_router(sucursales.router)        # /sucursales ...
+app.include_router(sucursales.router)        
 
 # ---- Startup ----
 @app.on_event("startup")
