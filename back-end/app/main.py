@@ -29,7 +29,7 @@ if isinstance(cors_origins, str):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins or ["http://localhost:3000", "http://localhost:5173", "https://uaoturnoeps.netlify.app/"],
+    allow_origins=cors_origins or ["http://localhost:3000", "http://localhost:5173", "https://uaoturnoeps.netlify.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
